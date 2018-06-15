@@ -5,8 +5,60 @@ Created on Fri Jun 15 14:56:26 2018
 @author: vemu0615
 """
 
-
+##########################NOTE::::
+########################PLEASE READ BEFORE EXECUTION #################
+"""
+Assumptions :
+    As assignment suggests, cursory analysis of stock companies, 
+    that focus on understanding 2 params: MARKETCAP_RS_CR and P/E(P_BY_E) ratio
+    and also various sectors based performance and distribution
+    Thus I remove the cases where MARKETCAP_RS_CR and P/E(P_BY_E) ratio
+    for CONSOLIDATED cases is absent.
+    AS1: Basically we have 2 possible values. But I consider only CONSOLIDATED
+    AS2: Remove NAN cases
+    AS3: Consider MARKETCAP_RS_CR based ranking for only those sectors who have > 4 companies
+    AS4: I dont write generic code for scrape. Code will impact, if website changes format
+    and reduce or increase no of parameters
+    AS5: in part 5 description below
     
+STEP 1: DATA SCRAPE
+Part 1 consists of web scraping of html links and list of 500 companies which appears
+on :
+    www.moneycontrol.com/india/stockpricequote
+    When code is excuted, its necessary to either provide:
+        www.moneycontrol.com/india/stockpricequote
+        or
+        provide list of companies in list companybook
+ links_moneycontrol_v5.csv willbe file composed of all 500 companies on part 1 
+completion
+
+Part 2: DATA SCRAPE
+This section contains all logic to extract the information of CONSOLIDATED Company
+parameters for all 500 companies
+This section will try to contact moneycontrol 500 times, thus may take time.
+I didnt focus to optimize this time.
+The web scraping takes 30 -40 mins
+and finally we get the transpose file:       input_scrape_moneycontrol_500.csv
+
+PART 3: Data Cleaning
+CHECKING DUPLICATES, renaming columns, removing extra characters, datatype conversions
+, fill NAN, drop NAN
+
+PART 4: Data analysis and decide assumptions
+
+PART 5:  Bucket P/E ratios in interval of 5, 11-15,16-20,21-25,...,66-70, then output list of
+companies in each bucket
+AS5: THERE ARE OUTLIERS in P/E meaning many cases where P/E > 70
+I dont worry, as its not asked in question. Although need to worry, if its real market data
+and need to find other resources to verify
+
+PART 6: 3rd and 4th highest market cap companies sector wise.
+ASSUMPTION: DO analysis for sectors having more than 3 companies
+I find 3 methods to solve it. 
+
+"""
+ 
+#########################PART 1 ################################3   
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
@@ -66,6 +118,7 @@ for k,v in d.items():
             
             
 test_df.to_csv('links_moneycontrol_v5.csv')    
+
 ##########################################################################
 #final  dictionary
 """
@@ -81,6 +134,14 @@ companybook=dict((k, d[k]) for k in ('PFR'	,
 #############IMP ALTERNATIVE
 companybook=d
 #############3
+
+
+#########################PART 1 ends ################################
+
+
+#########################PART 2  ################################3   
+   
+
 names = []
 values = [] 
 url1 = [] 
@@ -208,6 +269,10 @@ result=pd.merge(test_df, df2, on="company_code")
 result_f=pd.merge(result, sectors_df, on="company_code")
 result_f.to_csv('input_scrape_moneycontrol_500.csv')
 
+#########################PART 2 ends ################################
+
+#########################PART 3  ################################3   
+
 ######################CLEANING############################
 
 ######################CLEANING############################
@@ -257,6 +322,10 @@ result_f.shape
 result_f[result_f.company_code.duplicated()]
 if result_f.company_code.duplicated().sum()==0:
     print  ('No DUPLICATE data of COMPANIES')
+
+ #########################PART 3 ends ################################
+
+#########################PART 4  ################################3     
 ######################################################################
 ######################################################################
 ##############ANALYSIS#########################################3
@@ -270,8 +339,6 @@ result_f.describe()
 #result_f['sector'].value_counts().plot(kind='bar')
 result_f.groupby('company_category').size().plot(kind='bar',figsize=(13,9))
 #List unique values in the df['name'] column
-result_f.company_category.value_counts()
-result_f['P/E'].nunique()
 #checking the values and data we re interested into: MARKETCAP_RS_CR and P_BY_E
 #NAN is observed, which must be removed, as no other way to calculate the values
 result_f.isnull().sum()
@@ -285,3 +352,94 @@ result_f=result_f.dropna(subset=['MARKETCAP_RS_CR','P_BY_E'], how='any')
 
 ###443 companies available, as 57 companies didnt have P/E ratio
 
+#########################PART 4 ends ################################3     
+
+
+
+#########################PART 5 starts  ################################3     
+
+# cleaning rows which has empty P/E ratio
+#result_f = result[result['P/E']!= '-']
+
+## we need P/E ranges basically and companies under those ranges 
+#Bucket P/E ratios in interval of 5, 11-15,16-20,21-25,...,66-70, then output list of
+#companies in each bucket
+t=0.0
+for x in range(0,15):
+ print ("BUCKET IS:", t,"to:", t+5)   
+ print(result_f[(result_f['P_BY_E']>=t) & (result_f['P_BY_E']<t+5) ].loc[0:,['company_code','MARKETCAP_RS_CR','P_BY_E']])
+ t=t+5
+
+###THERE ARE OUTLIERS in P/E
+result_f[(result_f['P_BY_E']>=70) & (result_f['P_BY_E']<20000) ].loc[0:,['company_code','MARKETCAP_RS_CR','P_BY_E']]
+
+
+#########################PART 5 ends ################################3   
+
+
+#########################PART 6 ################################3   
+
+### a. 3rd and 4th highest market cap companies sector wise.
+
+#How many sectors have more than 4 companies
+result_f[result_f.company_category.value_counts()]
+
+# generate 'sector_companies_count' DF
+sector_companies_count = pd.DataFrame(result_f.company_category.value_counts().reset_index())
+sector_companies_count.columns = ['company_category', 'count_comp_cat']
+
+
+# merge 'result_f' & 'sector_companies_count'
+result_f = pd.merge(result_f, sector_companies_count, on='company_category')
+result_f.dtypes
+df_cc=result_f[result_f.count_comp_cat >= 4]
+df_cc.shape
+##our sectors of interest in which need to find 3rd and 4th top MARKETCAP_RS_CR
+## df_cc is the dataframe which has count of companies per sector for each company and also only
+#subset of companies that comes under sector which has more than 3 companies under them
+
+############## METHOD 1:##################
+df_cc.company_category.value_counts()
+df_cc1=df_cc.sort_values('MARKETCAP_RS_CR',ascending = False).groupby('company_category').head(4)
+df_cc2=df_cc1.sort_values('MARKETCAP_RS_CR',ascending = True).groupby('company_category').head(2)
+
+df_cc1.to_csv('MARKETCAP_RS_CR_dessc_.csv')
+df_cc2.to_csv('MARKETCAP_RS_CR_dessc_3_4.csv')
+
+
+
+############## METHOD 2:##################
+import pandasql
+
+def complex_sql(df):
+    result_df=df
+    q = """
+	  	  SELECT MARKETCAP_RS_CR, company_category, company_name, rnk
+        FROM
+       (  	   
+	select  MARKETCAP_RS_CR, company_category, company_name, rank() over (partition by company_category order by MARKETCAP_RS_CR DESC) as rnk
+       from result_df
+       where company_category in ( SELECT
+        company_category
+        from result_df 
+        group by 
+        company_category
+        having count(1) >3 )
+		VV
+       where VV.rnk in (3,4)
+        """
+
+    # Execute your SQL command against the pandas frame
+    sql_solution = pandasql.sqldf(q, locals(),drv = "SQLite")
+    return sql_solution  
+
+pandas_df = complex_sql(result_f)
+
+############## METHOD 3:##################
+
+
+
+g=df_cc.groupby('company_category')
+df_cc['rank_company_category'] = g['MARKETCAP_RS_CR'].rank(method='max')
+df_cc[df_cc.rank_company_category.isin(['3','4'])]
+df_cc[df_cc.rank_company_category.isin(['3','4'])].to_csv('MARKETCAP_RS_CR_dessc_3_4_v2.csv')
