@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Sat Jun 16 18:27:21 2018
+
+@author: vemu0615
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Fri Jun 15 14:56:26 2018
 
 @author: vemu0615
@@ -54,7 +61,10 @@ and need to find other resources to verify
 
 PART 6: 3rd and 4th highest market cap companies sector wise.
 ASSUMPTION: DO analysis for sectors having more than 3 companies
-I find 3 methods to solve it. 
+I try 3 methods to solve it. And 1 method successful
+BUT pandasql method fails as rank or rownum feature not available in it 
+Also method of groupby and then use rank fails, for few cases. Getting warning message 
+which can be corrected. 
 
 """
  
@@ -65,9 +75,12 @@ import pandas as pd
 import numpy as np  
 import time  
     #---TRYING TO MAKE DICTIONARY
+# Values will store the value of various params like p/e, marketcap, book value etc    
 values = []
-url = input("Enter a website to extract the URL's from: ")
-
+print ("Please mention what all companies you want to extract: PRESS 1 if you want all 500 companies. PRESS 2, if you want to provide list")
+choice_input=input("ENTER THE VALUE:")
+url = input("Enter a website to extract the URL's from !!!!NOTE!!!: ALWAYS copy from browser the link:: www.moneycontrol.com/india/stockpricequote:")
+print (url)
 r  = requests.get("http://" +url)
 
 data = r.text
@@ -93,17 +106,24 @@ test_df['company_name'] = e
 
 
 #FILL company_code
+# FOR EXAMPLE: http://www.moneycontrol.com/india/stockpricequote/banksprivatesector/yesbank/YB
+#has company code located as substring value after rightmost appearence of /
+# SIMILAR BEHAVIOR for every 500 companies on http://www.moneycontrol.com/india/stockpricequote
 for index, row in test_df.iterrows():
     i= (row["LINK"])
     print (row.LINK)
     print(i[i.rfind('/')+1:])  
     test_df.loc[index, 'company_code'] =(i[i.rfind('/')+1:])
-#FILL company_category    
+#FILL company_category 
+# FOR EXAMPLE: http://www.moneycontrol.com/india/stockpricequote/banksprivatesector/yesbank/YB
+#has company_category located as substring value only after immediate right  of http://www.moneycontrol.com/india/stockpricequote/
+# which comes at 50 th position and from that 50th position to next occurance of '/'    
 for index, row in test_df.iterrows():
     i= (row["LINK"])
     print(i[50:50+i[50:].find('/') ])
     test_df.loc[index, 'company_category'] =(i[50:50+i[50:].find('/') ])
 #FILL company_name
+#similarly this is automatically understood    
 for index, row in test_df.iterrows():
     i= (row["LINK"])
     test_df.loc[index, 'company_name'] =(i[50+i[50:].find('/')+1: i.rfind('/')])
@@ -112,36 +132,51 @@ for index, row in test_df.iterrows():
 test_df = test_df[test_df.LINK != 'javascript:;']
 #MAKE dictionary
 d= dict([(i,a) for i, a in zip( test_df.company_code, test_df.LINK)])
-print (d)    
+#print (d)    
 for k,v in d.items():
             print(k, 'corresponds to', v)
             
             
-test_df.to_csv('links_moneycontrol_v5.csv')    
+test_df.to_csv('links_moneycontrol_v6.csv')    
 
 ##########################################################################
 #final  dictionary
-"""
-companybook=dict((k, d[k]) for k in ('PFR'	,
-'AET'	,
-'AL9'	,
-'AIE01'	,
-'AP22'	,
-'ICI'	
-))
-"""
+# based on initial input choice at stdin, the dictionary is created either for list of few companies to analyze or
+# for all 500 companies
+if choice_input == '2':
+    
+    input_flag=''
+    while input_flag == '':
+     codes=[]
+     lim= int(input("HOW MANY COMPANY CODES TO ANALYZE?"))
+     print ("Enter all codes in 1 go, same as quantity YOU EXPRESS ")
+     codes = [str(x) for x in input().split()]
+     if len(codes)!= lim:
+        print("RE-ENTER THE COMPANY CODES AGAIN, SAME AS COMPANY CODES TO ANALYZE?" )
+     else:
+      companybook=dict((k, d[k]) for k in codes)
+      input_flag='INPUT_FINISH_FROM_USER'
+      print ("INPUT FINISH AND BELOW IS LIST FOR FURTHER DATA EXTRACTION AND ANALYSIS")
+      print (companybook)  
 
-#############IMP ALTERNATIVE
-companybook=d
+
+#############THIS BLOCK will choose if we want to do analysis of all 500 companies
+if choice_input == '1':
+ companybook=d
+ print ("INPUT FINISH AND all 500 companies processing begins FOR FURTHER DATA EXTRACTION AND ANALYSIS")
 #############3
 
 
-#########################PART 1 ends ################################
+#########################PART 1 ends COMPANY LIST companybook  is created ################################
 
 
-#########################PART 2  ################################3   
+#########################PART 2: SCRAPING BASED ON COMPANY LIST companybook ################################3   
    
-
+# Values will store the value of various params like p/e, marketcap, book value etc    
+# names will store parameter names as recovered from beautiful soup objects
+# url1 will store the hyperlinks lists corresponding to each company evaluation, which is appended
+# sectors will store company sector as derived from sec beautiful soup object
+# C_CODE is company code list
 names = []
 values = [] 
 url1 = [] 
@@ -150,15 +185,18 @@ C_CODE= []
     #C_CODE = input("Enter COMPANY CODE")
 for k,v in companybook.items():
             print(k, 'corresponds to', v)
-            
+            print ("***SCRAPING OF ABOVE COMPANY IN PROGRESS***")
 
             page = ''
             wait_param=0
+            # This try catch necessary, coz server was observed refuse connection, if we try to 
+            # approach moneycontrol more than threshold value
+            #thus necessary to have some pause and retry and not quit as exception
+            #although necessary to exit block, this page='a' is initialized, after 50 sec wait
             while page == '':
                     try:
                         response  = requests.get(v)
                         page = 'a'
-                        print (page)
                         break
                     except:
                         if wait_param<10:
@@ -173,15 +211,18 @@ for k,v in companybook.items():
                             page = 'a'
             #print(response.text[:500])
             html_soup = BeautifulSoup(response.text, 'html.parser')
-        
+        #"""
+        #In HTML THIS IS WHAT WAS OBSERVED, And based on that,
+        #necessary to identify appropriate tags like div, class, href, etc.
+        #and use html soup
         #<div class="FL gL_10 UC">MARKET CAP (Rs Cr)</div>
         #<div class="FR gD_12">681,869.24</div>
         #<!-- Standalone data starts here -->
         #<div id="mktdet_1" name="mktdet_1" style="display:none;">
-        
+        #"""
         #CL
-            mc = html_soup.find_all('div', class_ = 'FL gL_10 UC')
-            vc = html_soup.find_all('div', class_ = 'FR gD_12')
+            #mc = html_soup.find_all('div', class_ = 'FL gL_10 UC')
+            #vc = html_soup.find_all('div', class_ = 'FR gD_12')
             cc = html_soup.find_all("div",  {"class": ["FL gL_10 UC", "FR gD_12","mktdet_1"]})
             sec = html_soup.find_all('div', class_ = 'gry10')
             #sec[0].a
@@ -228,6 +269,7 @@ for k,v in companybook.items():
                                      'company_code':C_CODE})
             df_0=test_df1
             test_df1.to_csv('example_moneycontrol_v5.csv')
+            #the below block df, only serves for debugging, but still kept, as it creates the final desired structure we aim for CSV
             df = pd.DataFrame({names[0]: [values[0]],
                                    names[1]: [values[1]],
                                    names[2]: [values[2]],
@@ -243,7 +285,7 @@ for k,v in companybook.items():
             df2 = df
             len(values)/10
             df2=df2.truncate(before=5500, after=5500)
-            # Here we have 11 parameters, thus below code helps to create a transpose
+            # Here we have 11 parameters, thus below code helps to create a transpose which is desired csv for nice analyze
             for j in list(range(int(len(values)/11))):
                 if (10*j)<len(values)-10:
                  df = pd.DataFrame({names[0]: [values[0+(10*j)+j]],
@@ -267,8 +309,12 @@ for k,v in companybook.items():
 df2.to_csv('example_moneycontrol_v5_transpose.csv')
 result=pd.merge(test_df, df2, on="company_code")
 result_f=pd.merge(result, sectors_df, on="company_code")
+###NECESSARY merge to merge the sectors also
 result_f.to_csv('input_scrape_moneycontrol_500.csv')
-
+print ("$$$$$$$$$$$$$$$ SCRAPING IS COMPLETE, Plz check input_scrape_moneycontrol_500.csv $$$$$$$$$$$$$$$$")
+print ("NOW CLEANING AND DATATYPE CONVERSIONS BEGINS..\
+       ....")
+#ABOVE FILE NEEDS CLEANING AND DATATYPE CONVERSIONS which is all in below PART 3
 #########################PART 2 ends ################################
 
 #########################PART 3  ################################3   
@@ -322,7 +368,9 @@ result_f.shape
 result_f[result_f.company_code.duplicated()]
 if result_f.company_code.duplicated().sum()==0:
     print  ('No DUPLICATE data of COMPANIES')
+#result_f.to_csv('input_scrape_moneycontrol_443_after_cleaning.csv')
 
+###FINAL FILE ABOVE FOR DATA ANALYSIS
  #########################PART 3 ends ################################
 
 #########################PART 4  ################################3     
@@ -350,6 +398,14 @@ result_f['P_BY_E'].value_counts(dropna=False)
 #result_f = result_f[np.isfinite(result_f['P_BY_E'])]
 result_f=result_f.dropna(subset=['MARKETCAP_RS_CR','P_BY_E'], how='any')
 
+
+result_f.to_csv('input_scrape_moneycontrol_443_after_cleaning_analyze_v2.csv')
+print ("******************$$$ CLAENING IS COMPLETE, Plz check input_scrape_moneycontrol_443_after_cleaning_analyze_v2.csv $$$$$$$$$$$$$$$$")
+print ("****************************************")
+print ("NOW ANALYZE BEGINS FOR P/E..\
+       .....")
+###FINAL FILE ABOVE FOR questions and analysis and SQL
+
 ###443 companies available, as 57 companies didnt have P/E ratio
 
 #########################PART 4 ends ################################3     
@@ -371,18 +427,23 @@ for x in range(0,15):
  t=t+5
 
 ###THERE ARE OUTLIERS in P/E
-result_f[(result_f['P_BY_E']>=70) & (result_f['P_BY_E']<20000) ].loc[0:,['company_code','MARKETCAP_RS_CR','P_BY_E']]
+print ("OUTLIERS OF P/E, having more value of P/E than 70, which can either be fixed by reverify \
+       or data can be normnalized using modifed log values. Latter wasnt expected and not done ")
+print(result_f[(result_f['P_BY_E']>=70) & (result_f['P_BY_E']<20000) ].loc[0:,['company_code','MARKETCAP_RS_CR','P_BY_E']])
 
 
 #########################PART 5 ends ################################3   
 
 
 #########################PART 6 ################################3   
-
+print ("****************************************")
+print ("NOW ANALYZE BEGINS for 3rd and 4th highest market cap companies sector wise.\
+       .....")
 ### a. 3rd and 4th highest market cap companies sector wise.
 
 #How many sectors have more than 4 companies
-result_f[result_f.company_category.value_counts()]
+print ("In analysis data-How many sectors have more than 4 companies")
+print(result_f.company_category.value_counts())
 
 # generate 'sector_companies_count' DF
 sector_companies_count = pd.DataFrame(result_f.company_category.value_counts().reset_index())
@@ -391,9 +452,9 @@ sector_companies_count.columns = ['company_category', 'count_comp_cat']
 
 # merge 'result_f' & 'sector_companies_count'
 result_f = pd.merge(result_f, sector_companies_count, on='company_category')
-result_f.dtypes
+#result_f.dtypes
 df_cc=result_f[result_f.count_comp_cat >= 4]
-df_cc.shape
+#df_cc.shape
 ##our sectors of interest in which need to find 3rd and 4th top MARKETCAP_RS_CR
 ## df_cc is the dataframe which has count of companies per sector for each company and also only
 #subset of companies that comes under sector which has more than 3 companies under them
@@ -403,43 +464,175 @@ df_cc.company_category.value_counts()
 df_cc1=df_cc.sort_values('MARKETCAP_RS_CR',ascending = False).groupby('company_category').head(4)
 df_cc2=df_cc1.sort_values('MARKETCAP_RS_CR',ascending = True).groupby('company_category').head(2)
 
-df_cc1.to_csv('MARKETCAP_RS_CR_dessc_.csv')
+#df_cc1.to_csv('MARKETCAP_RS_CR_dessc_.csv')
 df_cc2.to_csv('MARKETCAP_RS_CR_dessc_3_4.csv')
+print ("FOR 3rd and 4th highest market cap companies sector wise \
+       MARKETCAP_RS_CR_dessc_3_4.csv by method 1 \
+       ")
+#print (df_cc2.head())
 
 
-
-############## METHOD 2:##################
-import pandasql
-
-def complex_sql(df):
-    result_df=df
-    q = """
-	  	  SELECT MARKETCAP_RS_CR, company_category, company_name, rnk
-        FROM
-       (  	   
-	select  MARKETCAP_RS_CR, company_category, company_name, rank() over (partition by company_category order by MARKETCAP_RS_CR DESC) as rnk
-       from result_df
-       where company_category in ( SELECT
-        company_category
-        from result_df 
-        group by 
-        company_category
-        having count(1) >3 )
-		VV
-       where VV.rnk in (3,4)
-        """
-
-    # Execute your SQL command against the pandas frame
-    sql_solution = pandasql.sqldf(q, locals(),drv = "SQLite")
-    return sql_solution  
-
-pandas_df = complex_sql(result_f)
-
+# =============================================================================
+# ############## METHOD 2:##################
+# 
+# import pandasql
+# 
+# def complex_sql(df):
+#     result_df=df
+#    
+#    q = 
+#    """
+# 	  	  SELECT MARKETCAP_RS_CR, company_category, company_name, rnk
+#         FROM
+#        (  	   
+# 	select  MARKETCAP_RS_CR, company_category, company_name, rank() over (partition by company_category order by MARKETCAP_RS_CR DESC) as rnk
+#        from result_df
+#        where company_category in ( SELECT
+#         company_category
+#         from result_df 
+#         group by 
+#         company_category
+#         having count(1) >3 )
+# 		VV
+#        where VV.rnk in (3,4)
+#         """
+#     
+#     # Execute your SQL command against the pandas frame
+#     sql_solution = pandasql.sqldf(q, locals(),drv = "SQLite")
+#     return sql_solution  
+# 
+# pandas_df = complex_sql(result_f)
+#
+# =============================================================================
 ############## METHOD 3:##################
 
+# =============================================================================
+# 
+# 
+# g=df_cc.groupby('company_category')
+# df_cc['rank_company_category'] = g['MARKETCAP_RS_CR'].rank(method='max')
+# df_cc[df_cc.rank_company_category.isin(['3','4'])]
+# df_cc[df_cc.rank_company_category.isin(['3','4'])].to_csv('MARKETCAP_RS_CR_dessc_3_4_v2.csv')
+# print ("FOR 3rd and 4th highest market cap companies sector wise \
+#        MARKETCAP_RS_CR_dessc_3_4.csv by method 1 \
+#        and MARKETCAP_RS_CR_dessc_3_4_v2.csv by method 2\
+#       \
+#         ")
+#df_cc.loc[:, 'rank_company_category'] = g['MARKETCAP_RS_CR'].rank(method='max')
+#p=g['MARKETCAP_RS_CR'].rank(method='max')
+#df_cc.loc[:, 'rank_company_category']=p
+#C:\Users\vemu0615\AppData\Local\Continuum\anaconda3\lib\site-packages\pandas\core\indexing.py:537: SettingWithCopyWarning: 
+# #WARNING
+# Try using .loc[row_indexer,col_indexer] = value instead
+# 
+# See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+#   self.obj[key] = _infer_fill_value(value)
+# C:\Users\vemu0615\AppData\Local\Continuum\anaconda3\lib\site-packages\pandas\core\indexing.py:537: SettingWithCopyWarning: 
+# A value is trying to be set on a copy of a slice from a DataFrame.
+# Try using .loc[row_indexer,col_indexer] = value instead
+# 
+# =============================================================================
+##########FINAL OUTPUTS:::
+
+print ("*********************FINAL OUTPUT FILES************************* \
+       ***************************************************************** \
+      ")
+
+print ("FOR FINAL OUTPUTS, PLEASE CHECK FILES BELOW GENERATED")
+print ("*****************************************************************")
+print ("*****************************************************************")
+
+print ("THE RAW FILE from website scrape, before pivot or transpose:\
+       example_moneycontrol_v5.csv\
+       ")
+print ("*****************************************************************")
+print ("*****************************************************************")
+print ("BASE FILE THAT CONTAINS ALL SCRAPED INFO PRIOR TO CLEANING AND ANALYZE: \
+    input_scrape_moneycontrol_500.csv\
+    ")
+print ("*****************************************************************")
+print ("*****************************************************************")
+print ("BASE FILE THAT CONTAINS ALL SCRAPED INFO AFTER CLEANING AND ANALYZE and SQL as well: \
+    input_scrape_moneycontrol_443_after_cleaning_analyze_v2.csv\
+    ")
+print ("*****************************************************************")
+print ("*****************************************************************")
+print ("FOR Bucket P/E ratios in interval of 5, 11-15,16-20,21-25,...\
+       KINDLY CHECK CONSOLE OUTPUT\
+       ")
+print ("*****************************************************************")
+print ("*****************************************************************")
+print ("FOR 3rd and 4th highest market cap companies sector wise \
+       MARKETCAP_RS_CR_dessc_3_4.csv by method 1 \
+       \
+       ")
+
+print ("*****************************************************************")
+print ("*****************************************************************")
+print ("*****************************************************************")
+print ("*****************************************************************")
 
 
-g=df_cc.groupby('company_category')
-df_cc['rank_company_category'] = g['MARKETCAP_RS_CR'].rank(method='max')
-df_cc[df_cc.rank_company_category.isin(['3','4'])]
-df_cc[df_cc.rank_company_category.isin(['3','4'])].to_csv('MARKETCAP_RS_CR_dessc_3_4_v2.csv')
+#####VISUALS##############
+print("SOME VISUALS AS BELOW:")
+print ("P/E distribution and count of companies\
+       ")
+print ("*****************************************************************")
+print ("*****************************************************************")
+bin_values = np.arange(start=-30, stop=500, step=5)
+result_f['P_BY_E'].hist(bins=bin_values, figsize=[18,9])
+
+import matplotlib.pyplot as plt
+import numpy as np
+print ("*****************************************************************")
+print ("*****************************************************************")
+print ("MARKETCAP_RS_CR distribution and count of companies \
+       ")
+print ("*****************************************************************")
+print ("*****************************************************************")
+bin_values = np.arange(start=result_f.MARKETCAP_RS_CR.min()-100, stop=result_f.MARKETCAP_RS_CR.max()+1000, step=500)
+result_f['MARKETCAP_RS_CR'].hist(bins=bin_values, figsize=[18,9])
+
+print ("*****************************************************************")
+print ("*****************************************************************")
+print ("sectorwise 3rd and 4th and marketcap value on y axis \
+       ")
+print ("*****************************************************************")
+print ("*****************************************************************")
+fig, ax = plt.subplots()
+fig.set_size_inches(28, 15)
+ax.bar(left=df_cc2.sector, height=df_cc2['MARKETCAP_RS_CR'], width=0.3)
+ax.set_xlabel("marketcap")
+ax.set_ylabel("sectorwise 3rd and 4th postition")
+ax.set_title("sectorwise 3rd and 4th postition marketcap distribution")
+ax.grid(color='g', linestyle='--', linewidth=0.5)
+plt.xticks(rotation='vertical')
+
+
+print ("*****************************************************************")
+print ("*****************************************************************")
+print ("companywise 3rd and 4th and marketcap value on y axis \
+       ")
+print ("*****************************************************************")
+print ("*****************************************************************")
+fig, ax = plt.subplots()
+fig.set_size_inches(40, 25)
+ax.bar(left=df_cc2.company_name, height=df_cc2['MARKETCAP_RS_CR'], width=0.5)
+plt.xlabel('xlabel', fontsize=45)
+ax.set_xlabel("marketcap")
+ax.set_ylabel("company wise 3rd and 4th postition")
+ax.set_title("company wise  3rd and 4th postition marketcap distribution")
+ax.xaxis.label.set_size(7)
+ax.grid(color='g', linestyle='--', linewidth=0.5)
+plt.xticks(rotation='vertical')
+ax.tick_params(direction='out', length=7, width=7 )
+###########################################EXTRA
+
+# =============================================================================
+# pd.read_csv('input_scrape_moneycontrol_500.csv')
+# pd.read_csv('links_moneycontrol_v5.csv')
+# result_f.MARKETCAP_RS_CR.min()
+# result_f.MARKETCAP_RS_CR.max()
+# result_f.dtypes
+# =============================================================================
+
