@@ -509,7 +509,7 @@ print ("FOR 3rd and 4th highest market cap companies sector wise \
 # =============================================================================
 # 
 # 
-# g=df_cc.groupby('company_category')
+g=df_cc.groupby('company_category')
 # df_cc['rank_company_category'] = g['MARKETCAP_RS_CR'].rank(method='max')
 # df_cc[df_cc.rank_company_category.isin(['3','4'])]
 # df_cc[df_cc.rank_company_category.isin(['3','4'])].to_csv('MARKETCAP_RS_CR_dessc_3_4_v2.csv')
@@ -531,6 +531,12 @@ print ("FOR 3rd and 4th highest market cap companies sector wise \
 # A value is trying to be set on a copy of a slice from a DataFrame.
 # Try using .loc[row_indexer,col_indexer] = value instead
 # 
+##THUS AFTER SOME GOOGLE, UNDERSTOOD ISSUE WITH PYTHON FOR CHAIN INDEXING
+##SOLUTION LIES, MAKE PYTHON UNDERSTAND EXPLICITLY THAT WE WORK ON COPY
+bf_cc = df_cc.copy()
+bf_cc.loc[:, 'rk'] = g['MARKETCAP_RS_CR'].rank(method='max',  ascending=False)
+bf_cc.loc[:,('company_code','sector','MARKETCAP_RS_CR','rk')]
+bf_cc[bf_cc.rk.isin(['3','4'])].to_csv('MARKETCAP_RS_CR_dessc_3_4_v2.csv')
 # =============================================================================
 ##########FINAL OUTPUTS:::
 
@@ -564,7 +570,7 @@ print ("*****************************************************************")
 print ("*****************************************************************")
 print ("FOR 3rd and 4th highest market cap companies sector wise \
        MARKETCAP_RS_CR_dessc_3_4.csv by method 1 \
-       \
+       and MARKETCAP_RS_CR_dessc_3_4_v2.csv by method 2\
        ")
 
 print ("*****************************************************************")
