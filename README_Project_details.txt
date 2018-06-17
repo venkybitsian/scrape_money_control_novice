@@ -157,3 +157,27 @@ I try 3 methods to solve it. And 1 method successful
 BUT pandasql method fails as rank or rownum feature not available in it 
 Also method of groupby and then use rank fails, for few cases. Getting warning message 
 which can be corrected. 
+
+************************************************************
+************************************************************
+
+THE FINAL OUTPUTS OF FILES:
+
+THE RAW FILE from website scrape, before pivot or transpose:
+       example_moneycontrol_v5.csv
+     
+"BASE FILE THAT CONTAINS ALL SCRAPED INFO PRIOR TO CLEANING AND ANALYZE: \
+    input_scrape_moneycontrol_500.csv\
+    "
+
+BASE FILE THAT CONTAINS ALL SCRAPED INFO AFTER CLEANING AND ANALYZE and SQL as well: \
+    moneycontrol_after_cleaning_analyze_forsql.csv\
+
+
+FOR Bucket P/E ratios in interval of 5, 11-15,16-20,21-25,...\
+       KINDLY CHECK CONSOLE OUTPUT (JUPYTER/SPYDER)
+
+FOR 3rd and 4th highest market cap companies sector wise \
+       MARKETCAP_RS_CR_dessc_3_4.csv by method 1 \
+       and MARKETCAP_RS_CR_dessc_3_4_v2.csv by method 2\
+
