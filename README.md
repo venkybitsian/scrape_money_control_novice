@@ -5,9 +5,14 @@ so that data analysis can be initiated:
 
 # PART 1:
 EXTRACT the 500 companies and their dynamic links
+The output of 500 companies and their links is in:
+https://github.com/venkybitsian/scrape_money_control_novice/blob/master/DEMO_SCRAPE_ANALYSIS_FOR_ALL_500_COMPANIES/links_moneycontrol_v6.csv
 
 # PART 2:
 Extract the basic parameters for stock related finnancial info on these 500 companies and create a final dataframe.
+The output of final Dataframe as created (with no cleaning)
+https://github.com/venkybitsian/scrape_money_control_novice/blob/master/DEMO_SCRAPE_ANALYSIS_FOR_ALL_500_COMPANIES/input_scrape_moneycontrol_500_before_cleaning.csv
+
 
 I observe 11 input parameters:
 
@@ -175,6 +180,9 @@ CHECKING DUPLICATES, renaming columns, removing extra characters, datatype conve
 # PART 4: Data analysis and decide assumptions
 Check missing values, check deviations
 
+# NOTE: AFTER PART 3 and PART 4: FILE WHICH WAS CREATED FOR 500 COMPANIES:
+https://github.com/venkybitsian/scrape_money_control_novice/blob/master/DEMO_SCRAPE_ANALYSIS_FOR_ALL_500_COMPANIES/input_scrape_moneycontrol_443_after_cleaning_analyze_v2.csv
+
 # PART 5:  Bucket P/E ratios in interval of 5, 11-15,16-20,21-25,...,66-70, then output list of
   companies in each bucket
 # ASSUMPTION 5: THERE ARE OUTLIERS in P/E meaning many cases where P/E > 70
@@ -213,3 +221,6 @@ FOR 3rd and 4th highest market cap companies sector wise \
 # ALSO BY SQL the same is solved: PLEASE READ FOR SQL STEPS
 
 https://github.com/venkybitsian/scrape_money_control_novice/blob/master/DEMO_SCRAPE_ANALYSIS_FOR_ALL_500_COMPANIES/README_EXECUTE_SQL.txt
+
+# FOR SQL, (for 443/500 companies) CSV used is:
+https://github.com/venkybitsian/scrape_money_control_novice/blob/master/DEMO_SCRAPE_ANALYSIS_FOR_ALL_500_COMPANIES/moneycontrol_after_cleaning_analyze_forsql.csv
