@@ -59,7 +59,7 @@ Note: although this is derived from other part of same website
 ******************************************************
 
 ##########################NOTE::::
-####################### # PLEASE READ BEFORE EXECUTION #################
+################# # PLEASE READ BEFORE EXECUTION #################
 """
 
 # Assumptions :
@@ -224,3 +224,7 @@ https://github.com/venkybitsian/scrape_money_control_novice/blob/master/DEMO_SCR
 
  FOR SQL, (for 443/500 companies) CSV used is:
 https://github.com/venkybitsian/scrape_money_control_novice/blob/master/DEMO_SCRAPE_ANALYSIS_FOR_ALL_500_COMPANIES/moneycontrol_after_cleaning_analyze_forsql.csv
+
+
+NOTE: This is mine first scraping assignment, thus can aim at optimize and write generic codes for future.
+SUGGESTIONS are valuable and welcome
