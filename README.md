@@ -197,7 +197,7 @@ BUT pandasql method fails as rank or rownum feature not available in it
 ************************************************************
 ************************************************************
 
-THE FINAL OUTPUTS OF FILES:
+# *************THE FINAL OUTPUTS OF FILES:************
 
 THE RAW FILE from website scrape, before pivot or transpose:
        example_moneycontrol_v5.csv
@@ -222,5 +222,5 @@ FOR 3rd and 4th highest market cap companies sector wise \
 
 https://github.com/venkybitsian/scrape_money_control_novice/blob/master/DEMO_SCRAPE_ANALYSIS_FOR_ALL_500_COMPANIES/README_EXECUTE_SQL.txt
 
-# FOR SQL, (for 443/500 companies) CSV used is:
+ FOR SQL, (for 443/500 companies) CSV used is:
 https://github.com/venkybitsian/scrape_money_control_novice/blob/master/DEMO_SCRAPE_ANALYSIS_FOR_ALL_500_COMPANIES/moneycontrol_after_cleaning_analyze_forsql.csv
