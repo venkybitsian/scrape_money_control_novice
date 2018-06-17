@@ -22,7 +22,7 @@ EPS_TTM              ,
 FACE_VALUE           ,
 INDUSTRY_P_BY_E      ,
 MARKETCAP_RS_CR      ,
-MARKET_LOT            ,
+MARKET_LOT           ,
 P_BY_C               ,
 P_BY_E               ,
 PRICE_BY_BOOK        ,
@@ -33,12 +33,21 @@ count_comp_cat         ,
 'LINK': This is  http link of stock, which is assumed and observed as STATIC
 
 'company_code': This is manually generated abbreviation for understanding company with company code
+DERIVE LOGIC:
+FOR EXAMPLE: http://www.moneycontrol.com/india/stockpricequote/banksprivatesector/yesbank/YB
+has company_category banksprivatesector located as substring value only after immediate right  of http://www.moneycontrol.com/india/stockpricequote/
+ which comes immediate after last occurance of '/' till end of string
 
 'company_category': is nothing but comapny sector
+DERIVE LOGIC:
+FOR EXAMPLE: http://www.moneycontrol.com/india/stockpricequote/banksprivatesector/yesbank/YB
+has company_category banksprivatesector located as substring value only after immediate right  of http://www.moneycontrol.com/india/stockpricequote/
+ which comes at 50 th position and from that 50th position to next occurance of '/'    
 
 'MARKETCAP_RS_CR'  and 'P_BY_E' are 2 params we re interested into
 
 'sector' is same as company_category
+Note: although this is derived from other part of same website
 
 'count_comp_cat' is script generated column which helps to know the quantity of companies underneath a sector and will be defined for each company
 
@@ -57,7 +66,7 @@ count_comp_cat         ,
    
    Thus I remove the cases where MARKETCAP_RS_CR and P/E(P_BY_E) ratio
     for CONSOLIDATED cases is absent.
-   MEANS I consider only CONSOLIDATED based params and its values
+   MEANS I consider only STANDALONE based params and its values
    
    # ASSUMPTION 1:
    Basically we have 2 possible values. But I consider only CONSOLIDATED. CHECK THE IMAGE
