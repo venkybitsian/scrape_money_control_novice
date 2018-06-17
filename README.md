@@ -1,13 +1,12 @@
 # scrape_money_control_novice
 
-# scrape_money_control_novice
 Data is ubiquitously scattered and web scraping plays critical role to fetch data in form of tables/dataframes,
 so that data analysis can be initiated:
 
-PART 1:
+# PART 1:
 EXTRACT the 500 companies and their dynamic links
 
-PART 2:
+# PART 2:
 Extract the basic parameters for stock related finnancial info on these 500 companies and create a final dataframe.
 
 I observe 11 input parameters:
@@ -46,10 +45,10 @@ count_comp_cat         ,
 ******************************************************
 
 ##########################NOTE::::
-########################PLEASE READ BEFORE EXECUTION #################
+####################### # PLEASE READ BEFORE EXECUTION #################
 """
 
-Assumptions :
+# Assumptions :
 
 
     As assignment suggests, cursory analysis of stock companies, 
@@ -60,21 +59,28 @@ Assumptions :
     for CONSOLIDATED cases is absent.
    MEANS I consider only CONSOLIDATED based params and its values
    
-   AS1: Basically we have 2 possible values. But I consider only CONSOLIDATED
+   # ASSUMPTION 1:
+   Basically we have 2 possible values. But I consider only CONSOLIDATED. CHECK THE IMAGE
+   https://github.com/venkybitsian/scrape_money_control_novice/blob/master/this_info_is_being_scraped_from_each_company.JPG
+   
   
-   AS2: Remove NAN cases
+   # ASSUMPTION 2:
+   Remove NAN cases pertaining to nonavailability of p_by_e ratio and marketcap values
    
-   AS3: Consider MARKETCAP_RS_CR based ranking for only those sectors who have > 4 companies
+   # ASSUMPTION 3: 
+   Consider MARKETCAP_RS_CR based ranking for only those sectors who have > 4 companies
    
-   AS4: I dont write generic code for scrape. Code will impact, if website changes format
+   # ASSUMPTION 4: 
+   I dont write generic code for scrape. Code will impact, if website changes format
       and reduce or increase no of parameters
    
-   AS5: in part 5 THERE ARE OUTLIERS in P/E meaning many cases where P/E > 70
+   # ASSUMPTION 5: 
+   In part 5 THERE ARE OUTLIERS in P/E meaning many cases where P/E > 70
         I dont worry, as its not asked in question. Although need to worry, if its real market data
-        and need to find other resources to verify
+        and need to find other resources to verify. Or approach data analysis after normalization of data for multiple params
     
-STEP 1: DATA SCRAPE
-Part 1 consists of web scraping of html links and list of 500 companies which appears
+# STEP 1 EXECUTION: DATA COLLECTION
+# Part 1 consists of web scraping of html links and list of 500 companiesis created. It also aims at creation of dictionary for companies that need to be analyzed
 on :
     www.moneycontrol.com/india/stockpricequote
     When code is excuted, its necessary to either provide:
@@ -93,6 +99,14 @@ ENTER quantity of companies:
 40
 
 ENTER THE NAMES LIKE:
+# NOTE:
+The company codes value has to be entered and can be found in:
+https://github.com/venkybitsian/scrape_money_control_novice/blob/master/DEMO_SCRAPE_ANALYSIS_FOR_LIST_OF_COMPANIES/links_moneycontrol_v6.csv
+
+or:is derived from hyperlink in belowe "EM"
+https://www.moneycontrol.com/india/stockpricequote/auto-lcvs-hcvs/eichermotors/EM
+
+------->>>>>INPUT GIVEN IS BELOW FOR 40 companies
 
 GP08
 GI25
@@ -137,32 +151,31 @@ JA02
 
 
 
-Part 2: DATA SCRAPE
+# Part 2: DATA SCRAPE
 This section contains all logic to extract the information of CONSOLIDATED Company
 parameters for all 500 companies
 This section will try to contact moneycontrol 500 times, thus may take time.
 I didnt focus to optimize this time.
-The web scraping takes 30 -40 mins
+The web scraping takes 30- 35 mins
 and finally we get the transpose file:       input_scrape_moneycontrol_500.csv
 
-PART 3: Data Cleaning
+# PART 3: Data Cleaning
 CHECKING DUPLICATES, renaming columns, removing extra characters, datatype conversions
 , fill NAN, drop NAN
 
-PART 4: Data analysis and decide assumptions
+# PART 4: Data analysis and decide assumptions
+Check missing values, check deviations
 
-PART 5:  Bucket P/E ratios in interval of 5, 11-15,16-20,21-25,...,66-70, then output list of
-companies in each bucket
-AS5: THERE ARE OUTLIERS in P/E meaning many cases where P/E > 70
+# PART 5:  Bucket P/E ratios in interval of 5, 11-15,16-20,21-25,...,66-70, then output list of
+  companies in each bucket
+# ASSUMPTION 5: THERE ARE OUTLIERS in P/E meaning many cases where P/E > 70
 I dont worry, as its not asked in question. Although need to worry, if its real market data
 and need to find other resources to verify
 
-PART 6: 3rd and 4th highest market cap companies sector wise.
-ASSUMPTION: DO analysis for sectors having more than 3 companies
+# PART 6: 3rd and 4th highest market cap companies sector wise.
+# ASSUMPTION 6: DO analysis for sectors having more than 3 companies
 I try 3 methods to solve it. And 2 method successful
 BUT pandasql method fails as rank or rownum feature not available in it 
-Also method of groupby and then use rank fails, for few cases. Getting warning message 
-which can be corrected. 
 
 ************************************************************
 ************************************************************
@@ -173,7 +186,7 @@ THE RAW FILE from website scrape, before pivot or transpose:
        example_moneycontrol_v5.csv
      
 "BASE FILE THAT CONTAINS ALL SCRAPED INFO PRIOR TO CLEANING AND ANALYZE: \
-    input_scrape_moneycontrol_500.csv\
+    input_scrape_moneycontrol_500_before_cleaning.csv\
     "
 
 BASE FILE THAT CONTAINS ALL SCRAPED INFO AFTER CLEANING AND ANALYZE and SQL as well: \
@@ -186,3 +199,8 @@ FOR Bucket P/E ratios in interval of 5, 11-15,16-20,21-25,...\
 FOR 3rd and 4th highest market cap companies sector wise \
        MARKETCAP_RS_CR_dessc_3_4.csv by method 1 \
        and MARKETCAP_RS_CR_dessc_3_4_v2.csv by method 2\
+       
+       
+# ALSO BY SQL the same is solved: PLEASE READ FOR SQL STEPS
+
+https://github.com/venkybitsian/scrape_money_control_novice/blob/master/DEMO_SCRAPE_ANALYSIS_FOR_ALL_500_COMPANIES/README_EXECUTE_SQL.txt
