@@ -36,23 +36,21 @@ echo $2
 _END
         sqlplus -S $DATABASE <<_END
         set pagesize 0 feedback off verify off heading off echo off;
-        CREATE TABLE $2 (
-company_code	varchar2(300)	,
-company_category	varchar2(300)	,
-company_name	varchar2(300)	,
-BOOK_VALUE_RS	number(18,3)	,
-DIV_PERCENT	number(18,3)	,
-DIV_YIELD_PERCENT	number(18,3)	,
-EPS_TTM	number(18,3)	,
-FACE_VALUE	number(18,3)	,
-INDUSTRY_P_BY_E	number(18,3)	,
-MARKETCAP_RS_CR	number(18,3)	,
-MARKET_LOT	number(18,3)	,
-P_BY_C	number(18,3)	,
-P_BY_E	number(18,3)	,
-PRICE_BY_BOOK	number(18,3)	,
-sector	varchar2(300)	
-);
+         CREATE TABLE $2 (
+	MARKETCAP_RS_CR number(18,3)    ,
+	P_BY_E number(18,3)    ,
+	BOOK_VALUE_RS number(18,3)    ,
+	DIV_PERCENT  number(18,3)    ,
+	MARKET_LOT  number(18,3)    ,
+	INDUSTRY_P_BY_E	  number(18,3)    ,
+	EPS_TTM	P_BY_C  number(18,3)    ,
+	PRICE_BY_BOOK  number(18,3)    ,
+	DIV_YIELD_PERCENT  number(18,3)    ,
+	FACE_VALUE	  number(18,3)    ,
+	sector varchar2(300),
+	company_code varchar2(300),
+	company_name varchar2(300)
+	);
         commit;
         exit;
 _END
