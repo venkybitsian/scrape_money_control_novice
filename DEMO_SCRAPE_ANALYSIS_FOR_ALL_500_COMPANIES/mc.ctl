@@ -7,21 +7,19 @@ FIELDS TERMINATED BY ','
 optionally enclosed by '"'
 TRAILING NULLCOLS
 (
-company_code	,
-company_category	,
-company_name	,
-BOOK_VALUE_RS	,
-DIV_PERCENT	,
-DIV_YIELD_PERCENT	,
-EPS_TTM	,
-FACE_VALUE	,
-INDUSTRY_P_BY_E	,
-MARKETCAP_RS_CR	,
-MARKET_LOT	,
-P_BY_C	,
-P_BY_E	,
-PRICE_BY_BOOK	,
-sector	
+MARKETCAP_RS_CR,
+	P_BY_E,
+	BOOK_VALUE_RS,
+	DIV_PERCENT,
+	MARKET_LOT,
+	INDUSTRY_P_BY_E	,
+	EPS_TTM	P_BY_C,
+	PRICE_BY_BOOK,
+	DIV_YIELD_PERCENT,
+	FACE_VALUE	,
+	sector,
+	company_code,
+	company_name
 )
 
         
