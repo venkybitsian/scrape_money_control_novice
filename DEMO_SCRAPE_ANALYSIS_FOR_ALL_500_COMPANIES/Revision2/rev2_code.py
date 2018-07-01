@@ -254,24 +254,29 @@ class moneycontrol:
                 print(k, 'corresponds to', v)
                 print ("***SCRAPING OF ABOVE COMPANY IN PROGRESS***")
                 values=[]
-                try:
-                    r=requests.get(v)
-                    d=r.text
-                    soup=BeautifulSoup(d,'html.parser')
-                    
-                    scrape_values=soup.findAll("div",{"class":"FR gD_12"})
-                     # our final dataframe to consists of the link(v) and its standalone respective parameters                 
-                     #create a Final 
-                    
-                    for e in scrape_values:
-                        values.append(e.text)
-                    df_final.loc[j]=[v,values[0],values[1],values[2],values[3],values[4],values[5],values[6],values[7],values[8],values[9],values[10],values[11]]
-                    j=j+1
-                #time.sleep(5)
-                except requests.exceptions.ConnectionError:
-                    print("Connection refused by the server...")
-                    print("Let me sleep for 5 seconds")
-                    time.sleep(10)
+                for attempt in range(5):
+                    try:
+                        r=requests.get(v)
+                        d=r.text
+                        soup=BeautifulSoup(d,'html.parser')
+                        
+                        scrape_values=soup.findAll("div",{"class":"FR gD_12"})
+                         # our final dataframe to consists of the link(v) and its standalone respective parameters                 
+                         #create a Final 
+                        
+                        for e in scrape_values:
+                            values.append(e.text)
+                        df_final.loc[j]=[v,values[0],values[1],values[2],values[3],values[4],values[5],values[6],values[7],values[8],values[9],values[10],values[11]]
+                        j=j+1
+                    #time.sleep(5)
+                    except requests.exceptions.ConnectionError:
+                        print("Connection refused by the server...")
+                        print("Let me sleep for 5 seconds")
+                        time.sleep(10)
+                    else:
+                        break
+               
+        
         except Exception as e:
             print("dataframe error: fn_input() is not correct, or dictionary companybook can be empty, thus no scraping without any companies(NOT ENOUGH COMPANIES)  " + str(e))
             print(traceback.format_exc())       
