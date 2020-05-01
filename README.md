@@ -6,7 +6,8 @@ TECHNICAL:
             
 Data is ubiquitously scattered and web scraping plays critical role to fetch data in form of tables/dataframes,
 so that data analysis can be initiated:
-Final Results: https://github.com/venkybitsian/scrape_money_control_novice/blob/master/DEMO_SCRAPE_ANALYSIS_FOR_ALL_500_COMPANIES/Revision2/extract_500.ipynb
+*Final Results:* https://github.com/venkybitsian/scrape_money_control_novice/blob/master/DEMO_SCRAPE_ANALYSIS_FOR_ALL_500_COMPANIES/Revision2/extract_500.ipynb
+
 Source of scrape:
 # PART 1:
 EXTRACT the 500 companies and their dynamic links
